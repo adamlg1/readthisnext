@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import BookCard from '../components/BookCard';
+import TestRecommendations from '../components/TestRecommendations';
 import { bookService } from '../services/bookService';
 
 const Home = () => {
@@ -70,7 +71,12 @@ const Home = () => {
                 <h2>Popular Books</h2>
                 {loading && <div className="loading">Loading popular books...</div>}
                 {error && <div className="error">{error}</div>}
-                {!loading && !error && (
+                {!loading && !error && popularBooks.length === 0 && (
+                    <div className="error">
+                        Popular books temporarily unavailable. Try searching for specific books instead!
+                    </div>
+                )}
+                {!loading && !error && popularBooks.length > 0 && (
                     <div className="book-grid">
                         {popularBooks.slice(0, 8).map((book) => (
                             <BookCard key={book.id} book={book} />
@@ -78,6 +84,9 @@ const Home = () => {
                     </div>
                 )}
             </section>
+
+            {/* Test Component - Remove this after debugging */}
+            <TestRecommendations />
         </div>
     );
 };

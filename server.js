@@ -74,7 +74,128 @@ app.get('/api/books/search', async (req, res) => {
     }
 });
 
-// Get book by ID
+// Get recommendations based on category (MUST come before /:id route)
+app.get('/api/books/recommendations', async (req, res) => {
+    try {
+        const { category = 'fiction', maxResults = 10 } = req.query;
+
+        console.log('Recommendations request:', { category, maxResults });
+        console.log('API Key present:', process.env.GOOGLE_BOOKS_API_KEY ? 'Yes' : 'No');
+
+        // Start with the simplest query that works
+        const query = category;
+        console.log(`Making recommendations request with query: "${query}"`);
+
+        const response = await axios.get(GOOGLE_BOOKS_API, {
+            params: {
+                q: query,
+                maxResults,
+                key: process.env.GOOGLE_BOOKS_API_KEY
+            },
+            timeout: 10000
+        });
+
+        console.log('Recommendations API response status:', response.status);
+        console.log('Recommendations API response items count:', response.data.items?.length || 0);
+
+        const books = response.data.items?.map(item => ({
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || [],
+            description: item.volumeInfo.description || '',
+            categories: item.volumeInfo.categories || [],
+            publishedDate: item.volumeInfo.publishedDate,
+            averageRating: item.volumeInfo.averageRating,
+            ratingsCount: item.volumeInfo.ratingsCount,
+            imageLinks: item.volumeInfo.imageLinks || {},
+            previewLink: item.volumeInfo.previewLink
+        })) || [];
+
+        console.log('Processed books count:', books.length);
+        res.json({ books });
+    } catch (error) {
+        console.error('Error fetching recommendations:', error.response?.data || error.message);
+        console.error('Status:', error.response?.status);
+        console.error('Full error:', error);
+
+        res.status(500).json({
+            error: 'Failed to fetch recommendations',
+            details: error.response?.data || error.message,
+            status: error.response?.status,
+            category: req.query.category
+        });
+    }
+});
+
+// Get popular books (MUST come before /:id route)
+app.get('/api/books/popular', async (req, res) => {
+    try {
+        const { maxResults = 8 } = req.query; // Reduced from 20 to 8
+
+        // Try multiple queries if one fails
+        const queries = [
+            'subject:fiction',
+            'harry potter',
+            'javascript programming',
+            'popular books'
+        ];
+
+        let response = null;
+        let lastError = null;
+
+        for (const query of queries) {
+            try {
+                console.log(`Trying query: ${query}`);
+                response = await axios.get(GOOGLE_BOOKS_API, {
+                    params: {
+                        q: query,
+                        maxResults: maxResults,
+                        key: process.env.GOOGLE_BOOKS_API_KEY
+                    },
+                    timeout: 10000 // 10 second timeout
+                });
+                console.log(`Success with query: ${query}`);
+                break; // Success, exit loop
+            } catch (error) {
+                console.log(`Failed with query: ${query}, Status: ${error.response?.status}`);
+                lastError = error;
+                // Wait 1 second before trying next query
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        if (!response) {
+            throw lastError || new Error('All queries failed');
+        }
+
+        const books = response.data.items?.map(item => ({
+            id: item.id,
+            title: item.volumeInfo.title,
+            authors: item.volumeInfo.authors || [],
+            description: item.volumeInfo.description || '',
+            categories: item.volumeInfo.categories || [],
+            publishedDate: item.volumeInfo.publishedDate,
+            averageRating: item.volumeInfo.averageRating,
+            ratingsCount: item.volumeInfo.ratingsCount,
+            imageLinks: item.volumeInfo.imageLinks || {},
+            previewLink: item.volumeInfo.previewLink
+        })) || [];
+
+        res.json({ books });
+    } catch (error) {
+        console.error('Error fetching popular books:', error.response?.data || error.message);
+        console.error('Status:', error.response?.status);
+
+        // Return empty array instead of error to prevent frontend crash
+        res.json({
+            books: [],
+            error: 'Popular books temporarily unavailable',
+            details: error.response?.status === 503 ? 'Google Books API rate limit reached' : error.message
+        });
+    }
+});
+
+// Get book by ID (MUST come after specific routes)
 app.get('/api/books/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -82,7 +203,8 @@ app.get('/api/books/:id', async (req, res) => {
         const response = await axios.get(`${GOOGLE_BOOKS_API}/${id}`, {
             params: {
                 key: process.env.GOOGLE_BOOKS_API_KEY
-            }
+            },
+            timeout: 10000
         });
 
         const item = response.data;
@@ -105,76 +227,17 @@ app.get('/api/books/:id', async (req, res) => {
 
         res.json(book);
     } catch (error) {
-        console.error('Error fetching book:', error.message);
-        res.status(500).json({ error: 'Failed to fetch book details' });
-    }
-});
+        console.error('Error fetching book:', error.response?.data || error.message);
+        console.error('Status:', error.response?.status);
+        console.error('Book ID requested:', req.params.id);
+        console.error('API Key present:', process.env.GOOGLE_BOOKS_API_KEY ? 'Yes' : 'No');
 
-// Get recommendations based on category
-app.get('/api/books/recommendations', async (req, res) => {
-    try {
-        const { category = 'fiction', maxResults = 10 } = req.query;
-
-        const response = await axios.get(GOOGLE_BOOKS_API, {
-            params: {
-                q: `subject:${category}`,
-                orderBy: 'relevance',
-                maxResults,
-                key: process.env.GOOGLE_BOOKS_API_KEY
-            }
+        res.status(500).json({
+            error: 'Failed to fetch book details',
+            details: error.response?.data || error.message,
+            status: error.response?.status,
+            bookId: req.params.id
         });
-
-        const books = response.data.items?.map(item => ({
-            id: item.id,
-            title: item.volumeInfo.title,
-            authors: item.volumeInfo.authors || [],
-            description: item.volumeInfo.description || '',
-            categories: item.volumeInfo.categories || [],
-            publishedDate: item.volumeInfo.publishedDate,
-            averageRating: item.volumeInfo.averageRating,
-            ratingsCount: item.volumeInfo.ratingsCount,
-            imageLinks: item.volumeInfo.imageLinks || {},
-            previewLink: item.volumeInfo.previewLink
-        })) || [];
-
-        res.json({ books });
-    } catch (error) {
-        console.error('Error fetching recommendations:', error.message);
-        res.status(500).json({ error: 'Failed to fetch recommendations' });
-    }
-});
-
-// Get popular books (bestsellers)
-app.get('/api/books/popular', async (req, res) => {
-    try {
-        const { maxResults = 20 } = req.query;
-
-        const response = await axios.get(GOOGLE_BOOKS_API, {
-            params: {
-                q: 'bestseller',
-                orderBy: 'relevance',
-                maxResults,
-                key: process.env.GOOGLE_BOOKS_API_KEY
-            }
-        });
-
-        const books = response.data.items?.map(item => ({
-            id: item.id,
-            title: item.volumeInfo.title,
-            authors: item.volumeInfo.authors || [],
-            description: item.volumeInfo.description || '',
-            categories: item.volumeInfo.categories || [],
-            publishedDate: item.volumeInfo.publishedDate,
-            averageRating: item.volumeInfo.averageRating,
-            ratingsCount: item.volumeInfo.ratingsCount,
-            imageLinks: item.volumeInfo.imageLinks || {},
-            previewLink: item.volumeInfo.previewLink
-        })) || [];
-
-        res.json({ books });
-    } catch (error) {
-        console.error('Error fetching popular books:', error.message);
-        res.status(500).json({ error: 'Failed to fetch popular books' });
     }
 });
 

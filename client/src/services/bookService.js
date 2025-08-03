@@ -35,12 +35,15 @@ export const bookService = {
     // Get recommendations
     getRecommendations: async (category = 'fiction', maxResults = 10) => {
         try {
+            console.log('Calling recommendations API with:', { category, maxResults });
             const response = await api.get('/books/recommendations', {
                 params: { category, maxResults }
             });
+            console.log('Recommendations API response:', response.data);
             return response.data;
         } catch (error) {
             console.error('Error fetching recommendations:', error);
+            console.error('Error response:', error.response?.data);
             throw new Error('Failed to fetch recommendations. Please try again.');
         }
     },

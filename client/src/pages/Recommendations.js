@@ -31,9 +31,17 @@ const Recommendations = () => {
         try {
             setLoading(true);
             setError(null);
+            console.log('Fetching recommendations for category:', category);
             const data = await bookService.getRecommendations(category, 20);
+            console.log('Received recommendations data:', data);
             setRecommendations(data.books || []);
+
+            // If we got an error message from the backend, show it
+            if (data.error && data.books?.length === 0) {
+                setError(data.error);
+            }
         } catch (err) {
+            console.error('Error in fetchRecommendations:', err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -83,15 +91,23 @@ const Recommendations = () => {
                 </h2>
 
                 {loading && <div className="loading">Loading recommendations...</div>}
-                {error && <div className="error">{error}</div>}
-
-                {!loading && !error && recommendations.length === 0 && (
+                {error && (
                     <div className="error">
-                        No recommendations found for this category. Try selecting a different category.
+                        {error}
+                        <br />
+                        <small>Try selecting a different category or search for specific books instead.</small>
                     </div>
                 )}
 
-                {!loading && !error && recommendations.length > 0 && (
+                {!loading && !error && recommendations.length === 0 && (
+                    <div className="error">
+                        No recommendations found for "{categories.find(cat => cat.value === selectedCategory)?.label}".
+                        <br />
+                        Try selecting a different category or use the search function instead.
+                    </div>
+                )}
+
+                {!loading && recommendations.length > 0 && (
                     <div className="book-grid">
                         {recommendations.map((book) => (
                             <BookCard key={book.id} book={book} />
