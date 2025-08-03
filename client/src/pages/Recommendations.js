@@ -72,8 +72,8 @@ const Recommendations = () => {
                             className={`category-card ${selectedCategory === category.value ? 'active' : ''}`}
                             style={{
                                 border: 'none',
-                                backgroundColor: selectedCategory === category.value ? '#26A69A' : 'white',
-                                color: selectedCategory === category.value ? 'white' : '#333',
+                                backgroundColor: selectedCategory === category.value ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                                color: selectedCategory === category.value ? 'var(--text-white)' : 'var(--text-primary)',
                                 transform: selectedCategory === category.value ? 'translateY(-3px)' : 'none'
                             }}
                         >

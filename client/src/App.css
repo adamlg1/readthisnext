@@ -1,3 +1,58 @@
+/* CSS Variables for Light/Dark Mode */
+:root {
+  /* Light Mode Colors */
+  --bg-primary: #F1F8F6;
+  --bg-secondary: white;
+  --bg-hero: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+  --bg-header: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
+  --bg-button: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
+
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-title: #00695C;
+  --text-white: white;
+
+  --border-light: #E0F2F1;
+  --border-focus: #26A69A;
+  --border-hover: #26A69A;
+
+  --shadow-light: rgba(38, 166, 154, 0.1);
+  --shadow-medium: rgba(38, 166, 154, 0.2);
+
+  --accent-primary: #26A69A;
+  --accent-hover: rgba(255, 255, 255, 0.1);
+  --error-bg: #fee;
+  --error-text: #c33;
+}
+
+/* Dark Mode Colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0D1B17;
+    --bg-secondary: #1A2F28;
+    --bg-hero: linear-gradient(135deg, #1A2F28 0%, #0F221C 100%);
+    --bg-header: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
+    --bg-button: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
+
+    --text-primary: #E8F5E8;
+    --text-secondary: #B0C4B0;
+    --text-title: #4DB6AC;
+    --text-white: white;
+
+    --border-light: #2D4A3A;
+    --border-focus: #4DB6AC;
+    --border-hover: #4DB6AC;
+
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+
+    --accent-primary: #4DB6AC;
+    --accent-hover: rgba(255, 255, 255, 0.1);
+    --error-bg: #4A1A1A;
+    --error-text: #FF6B6B;
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,9 +61,10 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #F1F8F6;
-  color: #333;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .App {
@@ -23,10 +79,10 @@ body {
 
 /* Header Styles */
 .header {
-  background: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
-  color: white;
+  background: var(--bg-header);
+  color: var(--text-white);
   padding: 1rem 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow-light);
 }
 
 .header-content {
@@ -42,7 +98,7 @@ body {
   font-size: 1.8rem;
   font-weight: bold;
   text-decoration: none;
-  color: white;
+  color: var(--text-white);
 }
 
 .nav {
@@ -52,7 +108,7 @@ body {
 }
 
 .nav a {
-  color: white;
+  color: var(--text-white);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
@@ -60,7 +116,7 @@ body {
 }
 
 .nav a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--accent-hover);
 }
 
 /* Search Bar */
@@ -80,20 +136,22 @@ body {
   flex: 1;
   padding: 12px 16px;
   font-size: 16px;
-  border: 2px solid #ddd;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-light);
   border-radius: 25px;
   outline: none;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
 }
 
 .search-input:focus {
-  border-color: #26A69A;
+  border-color: var(--border-focus);
 }
 
 .search-button {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #26A69A 0%, #00695C 100%);
-  color: white;
+  background: var(--bg-button);
+  color: var(--text-white);
   border: none;
   border-radius: 25px;
   font-size: 16px;
@@ -114,12 +172,12 @@ body {
 }
 
 .book-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 10px;
-  border: 1px solid #E0F2F1;
+  border: 1px solid var(--border-light);
   padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(38, 166, 154, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  box-shadow: 0 4px 15px var(--shadow-light);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.3s;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -127,8 +185,8 @@ body {
 
 .book-card:hover {
   transform: translateY(-5px);
-  border-color: #26A69A;
-  box-shadow: 0 8px 25px rgba(38, 166, 154, 0.2);
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 25px var(--shadow-medium);
   text-decoration: none;
 }
 
@@ -154,11 +212,11 @@ body {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #00695C;
+  color: var(--text-title);
 }
 
 .book-authors {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
@@ -174,7 +232,7 @@ body {
 }
 
 .book-description {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.5;
   display: -webkit-box;
@@ -187,7 +245,7 @@ body {
 .hero {
   text-align: center;
   padding: 4rem 0;
-  background: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+  background: var(--bg-hero);
   border-radius: 15px;
   margin-bottom: 3rem;
 }
@@ -195,12 +253,12 @@ body {
 .hero h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .hero p {
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto;
 }
@@ -213,7 +271,7 @@ body {
 .categories h2 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .category-grid {
@@ -223,20 +281,22 @@ body {
 }
 
 .category-card {
-  background: white;
+  background: var(--bg-secondary);
   padding: 2rem;
   border-radius: 10px;
+  border: 1px solid var(--border-light);
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s;
+  box-shadow: 0 4px 15px var(--shadow-light);
+  transition: transform 0.3s, background-color 0.3s, border-color 0.3s;
   cursor: pointer;
   text-decoration: none;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .category-card:hover {
   transform: translateY(-3px);
-  color: #26A69A;
+  color: var(--accent-primary);
+  border-color: var(--border-hover);
 }
 
 .category-icon {
@@ -249,13 +309,13 @@ body {
   text-align: center;
   padding: 2rem;
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Error */
 .error {
-  background-color: #fee;
-  color: #c33;
+  background-color: var(--error-bg);
+  color: var(--error-text);
   padding: 1rem;
   border-radius: 5px;
   margin: 1rem 0;
