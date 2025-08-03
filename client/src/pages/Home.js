@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import BookCard from '../components/BookCard';
-import TestRecommendations from '../components/TestRecommendations';
 import { bookService } from '../services/bookService';
 
 const Home = () => {
@@ -84,9 +83,6 @@ const Home = () => {
                     </div>
                 )}
             </section>
-
-            {/* Test Component - Remove this after debugging */}
-            <TestRecommendations />
         </div>
     );
 };
